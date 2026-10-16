@@ -379,7 +379,7 @@
             }
         });
 
-        // Fetch Movies with Auto-Sanitizer & Referrer Bypass
+        // Fetch Movies with Auto-Sanitizer
         async function fetchMovies() {
             try {
                 const response = await fetch(GITHUB_JSON_URL);
@@ -422,8 +422,11 @@
             const card = document.createElement('div');
             card.className = isGrid ? 'grid-card' : 'movie-card';
             
+            // Pass thumbnail through Weserv Image Proxy (Acts like Glide) to bypass CORS & Hotlink blocking
+            const proxiedThumb = `https://wsrv.nl/?url=${encodeURIComponent(movie.tham)}&w=400&fit=cover`;
+
             card.innerHTML = `
-                <img src="${movie.tham}" alt="Thumbnail" referrerpolicy="no-referrer" crossorigin="anonymous" loading="lazy">
+                <img src="${proxiedThumb}" alt="Thumbnail" loading="lazy">
                 <div class="badge-hd">HD</div>
             `;
 
