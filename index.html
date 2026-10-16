@@ -563,7 +563,7 @@
         </a>
     </div>
 
-    <!-- Sidebar Drawer Menu -->
+    <!-- Sidebar Drawer Menu (UNTOUCHED) -->
     <div class="drawer-overlay" id="drawerOverlay"></div>
     <div class="drawer" id="sidebarDrawer">
         <div class="drawer-header">
@@ -583,9 +583,8 @@
         </div>
     </div>
 
-    <!-- Main Container (Home View) -->
+    <!-- Main Container (Home View - 100% UNTOUCHED) -->
     <div class="container" id="homeView">
-        <!-- New Videos Section -->
         <section id="newVideosSection">
             <div class="section-header">
                 <div class="section-title">🔥 New Video</div>
@@ -599,7 +598,6 @@
             </div>
         </section>
 
-        <!-- All / Category Videos Section -->
         <section>
             <div class="section-header">
                 <div class="section-title" id="allSectionTitle">⏹️ All Video</div>
@@ -682,7 +680,7 @@
         let allMoviesData = [];
         let adsConfig = { direct_link_1: "", direct_link_2: "" };
         
-        // Ad unlock state
+        // Ad unlock state per video / part
         let currentAdStep = 1; // 1 or 2
         let adOpenedTime = 0;
         let isTabAway = false;
@@ -746,6 +744,9 @@
                     text = text.replace(/,\s*([\]}])/g, '$1');
                     allMoviesData = JSON.parse(text);
                     renderHomeUI(allMoviesData);
+                    
+                    // Check if URL has hash (Direct Video Link Support e.g. #v=0)
+                    checkUrlHash();
                 }
 
                 if (adsRes.ok) {
@@ -785,18 +786,21 @@
 
             newVideosRow.innerHTML = '';
             const newVideos = [...movies].reverse().slice(0, 10);
-            newVideos.forEach(movie => {
-                newVideosRow.appendChild(createMovieCard(movie, false));
+            newVideos.forEach((movie, index) => {
+                const realIndex = movies.indexOf(movie);
+                newVideosRow.appendChild(createMovieCard(movie, false, realIndex));
             });
 
             allVideosGrid.innerHTML = '';
             const randomVideos = [...movies].sort(() => Math.random() - 0.5);
             randomVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie, true));
+                const realIndex = movies.indexOf(movie);
+                allVideosGrid.appendChild(createMovieCard(movie, true, realIndex));
             });
         }
 
         window.goHome = function() {
+            history.pushState(null, '', window.location.pathname);
             renderHomeUI(allMoviesData);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -821,12 +825,13 @@
             const categoryVideos = shuffled.slice(0, 20);
 
             categoryVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie, true));
+                const realIndex = allMoviesData.indexOf(movie);
+                allVideosGrid.appendChild(createMovieCard(movie, true, realIndex));
             });
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function createMovieCard(movie, isGrid) {
+        function createMovieCard(movie, isGrid, movieIndex) {
             const card = document.createElement('div');
             card.className = isGrid ? 'grid-card' : 'movie-card';
             
@@ -851,23 +856,34 @@
                 </div>
             `;
 
-            card.addEventListener('click', () => openWatchPage(movie, title, views, timeAgo));
+            card.addEventListener('click', () => {
+                history.pushState(null, '', `#v=${movieIndex}`);
+                openWatchPage(movie, title, views, timeAgo);
+            });
             return card;
         }
 
-        function openWatchPage(movie, title, views, timeAgo) {
-            homeView.style.display = 'none';
-            watchView.style.display = 'block';
+        function checkUrlHash() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#v=')) {
+                const index = parseInt(hash.replace('#v=', ''));
+                if (!isNaN(index) && allMoviesData[index]) {
+                    const movie = allMoviesData[index];
+                    const title = sampleTitles[Math.floor(Math.random() * sampleTitles.length)];
+                    const views = sampleViews[Math.floor(Math.random() * sampleViews.length)];
+                    const timeAgo = sampleTimes[Math.floor(Math.random() * sampleTimes.length)];
+                    openWatchPage(movie, title, views, timeAgo);
+                }
+            }
+        }
 
-            topbarLeft.innerHTML = `
-                <div class="back-icon" onclick="goHome()">← Back</div>
-                <div class="logo" onclick="goHome()">🔥 HotVibe</div>
-            `;
+        window.addEventListener('hashchange', () => {
+            if (!window.location.hash) {
+                renderHomeUI(allMoviesData);
+            }
+        });
 
-            watchTitle.textContent = title;
-            watchMeta.textContent = `${views} • ${timeAgo}`;
-
-            // Reset Ad State
+        function resetAdUnlock() {
             currentAdStep = 1;
             adOpenedTime = 0;
             isTabAway = false;
@@ -884,6 +900,21 @@
             adActionBtn.disabled = false;
             adInstruction.innerHTML = "ভিডিও দেখতে নিচের বাটনে ক্লিক করে ৬ সেকেন্ড অপেক্ষা করুন।";
             warningText.textContent = "";
+        }
+
+        function openWatchPage(movie, title, views, timeAgo) {
+            homeView.style.display = 'none';
+            watchView.style.display = 'block';
+
+            topbarLeft.innerHTML = `
+                <div class="back-icon" onclick="goHome()">← Back</div>
+                <div class="logo" onclick="goHome()">🔥 HotVibe</div>
+            `;
+
+            watchTitle.textContent = title;
+            watchMeta.textContent = `${views} • ${timeAgo}`;
+
+            resetAdUnlock();
 
             partsContainer.innerHTML = '';
             if (movie.videos && movie.videos.length > 0) {
@@ -899,9 +930,10 @@
                         document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         mainVideoPlayer.src = videoUrl;
-                        if (adUnlockOverlay.style.display === 'none') {
-                            mainVideoPlayer.play();
-                        }
+                        
+                        // Whenever switching parts, require completing the 2 ad steps again!
+                        resetAdUnlock();
+                        mainVideoPlayer.pause();
                     });
 
                     partsContainer.appendChild(btn);
@@ -911,7 +943,8 @@
             recommendedGrid.innerHTML = '';
             const recs = [...allMoviesData].sort(() => Math.random() - 0.5).slice(0, 20);
             recs.forEach(recMovie => {
-                recommendedGrid.appendChild(createMovieCard(recMovie, true));
+                const realIndex = allMoviesData.indexOf(recMovie);
+                recommendedGrid.appendChild(createMovieCard(recMovie, true, realIndex));
             });
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -933,7 +966,7 @@
                         
                         adActionBtn.disabled = false;
                         adActionBtn.textContent = `Step ${currentAdStep}`;
-                        adInstruction.innerHTML = "অ্যাড পেজে ৬ সেকেন্ড অপেক্ষা করা হয়নি।";
+                        adInstruction.innerHTML = "৬ সেকেন্ড অপেক্ষা করা হয়নি।";
                         adOpenedTime = 0;
                         isTabAway = false;
                     } else {
@@ -977,10 +1010,8 @@
                     adInstruction.innerHTML = `অনুগ্রহ করে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন...`;
                 } else {
                     clearInterval(countdownInterval);
-                    // Check if user actually stayed away or came back early
                     const totalElapsed = Date.now() - adOpenedTime;
                     if (isTabAway && totalElapsed >= 5800) {
-                        // Success!
                         if (currentAdStep === 1) {
                             step1Indicator.className = "step-circle done";
                             step1Indicator.textContent = "✓";
@@ -1007,7 +1038,6 @@
                             }, 800);
                         }
                     } else {
-                        // Failed / Came back too early
                         warningText.textContent = "স্টেপটি পুনরায় করুন।";
                         adActionBtn.disabled = false;
                         adActionBtn.textContent = `Step ` + currentAdStep;
