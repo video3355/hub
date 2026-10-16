@@ -15,6 +15,7 @@
             --card-bg: #131b2e;
             --card-hover: #1c263d;
             --border-color: #1f293d;
+            --success-color: #10b981;
         }
 
         [data-theme="light"] {
@@ -26,6 +27,7 @@
             --card-bg: #e2e8f0;
             --card-hover: #cbd5e1;
             --border-color: #cbd5e1;
+            --success-color: #10b981;
         }
 
         * {
@@ -227,7 +229,7 @@
             color: #fff;
         }
 
-        /* Horizontal Row for New Videos (Fixed proper width) */
+        /* Horizontal Row */
         .horizontal-scroll {
             display: flex;
             gap: 14px;
@@ -242,8 +244,8 @@
         }
 
         .movie-card {
-            min-width: 240px;
-            width: 240px;
+            min-width: 250px;
+            width: 250px;
             background-color: var(--surface-color);
             border-radius: 14px;
             overflow: hidden;
@@ -258,9 +260,9 @@
             transform: translateY(-3px);
         }
 
-        .movie-card .thumbnail-box {
+        .thumbnail-box {
             width: 100%;
-            height: 130px;
+            height: 140px;
             position: relative;
             background: #111827;
             display: flex;
@@ -330,7 +332,7 @@
             padding: 0 2px;
         }
 
-        /* Strict 2-Column Grid for All Videos */
+        /* Strict 2-Column Grid */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -376,12 +378,107 @@
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            position: relative;
         }
 
         .youtube-player-container video {
             width: 100%;
             height: 100%;
             outline: none;
+            display: none; /* Hidden until ad steps completed */
+        }
+
+        /* Ad Unlock Box Overlay */
+        .ad-unlock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 19, 34, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .ad-unlock-overlay h2 {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ff2a6d, #ff6b00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ad-unlock-overlay p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .steps-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .step-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .step-circle.done {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: #fff;
+        }
+
+        .step-circle.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.4);
+        }
+
+        .step-line {
+            width: 60px;
+            height: 3px;
+            background: var(--border-color);
+        }
+
+        .step-line.done {
+            background: var(--success-color);
+        }
+
+        .ad-action-btn {
+            background: linear-gradient(135deg, #ff2a6d, #ff6b00);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255, 42, 109, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .ad-action-btn:hover {
+            transform: scale(1.03);
         }
 
         .watch-info {
@@ -499,9 +596,24 @@
 
     <!-- YouTube-Style Watch View -->
     <div class="container" id="watchView">
-        <div class="youtube-player-container">
+        <div class="youtube-player-container" id="playerContainer">
             <video id="mainVideoPlayer" controls></video>
+            
+            <!-- Ad Unlock Box Overlay -->
+            <div class="ad-unlock-overlay" id="adUnlockOverlay">
+                <h2>Ready to Next</h2>
+                <p id="adInstruction">Please wait for the timer to finish to proceed.</p>
+                
+                <div class="steps-row">
+                    <div class="step-circle active" id="step1Indicator">1</div>
+                    <div class="step-line" id="line1"></div>
+                    <div class="step-circle" id="step2Indicator">2</div>
+                </div>
+
+                <button class="ad-action-btn" id="adActionBtn" onclick="handleAdStepClick()">Complete Step 1</button>
+            </div>
         </div>
+
         <div class="watch-info">
             <div class="watch-title" id="watchTitle">Video Title</div>
             <div class="watch-meta" id="watchMeta">125K views • 2 hours ago</div>
@@ -515,7 +627,8 @@
     </div>
 
     <script>
-        const GITHUB_JSON_URL = "https://raw.githubusercontent.com/video3355/movie-vault-data/main/movies.json";
+        const GITHUB_MOVIES_URL = "https://raw.githubusercontent.com/video3355/movie-vault-data/main/movies.json";
+        const GITHUB_ADS_URL = "https://raw.githubusercontent.com/video3355/ads/refs/heads/main/ads";
         
         const homeView = document.getElementById('homeView');
         const watchView = document.getElementById('watchView');
@@ -529,6 +642,13 @@
         const partsContainer = document.getElementById('partsContainer');
         const topbarLeft = document.getElementById('topbarLeft');
         
+        const adUnlockOverlay = document.getElementById('adUnlockOverlay');
+        const adActionBtn = document.getElementById('adActionBtn');
+        const adInstruction = document.getElementById('adInstruction');
+        const step1Indicator = document.getElementById('step1Indicator');
+        const step2Indicator = document.getElementById('step2Indicator');
+        const line1 = document.getElementById('line1');
+
         const menuBtn = document.getElementById('menuBtn');
         const sidebarDrawer = document.getElementById('sidebarDrawer');
         const drawerOverlay = document.getElementById('drawerOverlay');
@@ -541,6 +661,12 @@
         const allSectionTitle = document.getElementById('allSectionTitle');
 
         let allMoviesData = [];
+        let adsConfig = { direct_link_1: "", direct_link_2: "" };
+        
+        // Ad unlock state
+        let currentAdStep = 1; // 1 or 2
+        let adClickTimestamp = 0;
+        let activeVideoUrl = "";
 
         // Drawer Menu Toggle
         menuBtn.addEventListener('click', () => {
@@ -588,16 +714,33 @@
         const sampleViews = ["125K views", "98K views", "210K views", "180K views", "320K views", "275K views", "410K views", "190K views"];
         const sampleDurations = ["12:34", "08:21", "10:18", "15:46", "11:22", "09:15", "14:08", "07:36"];
 
-        async function fetchMovies() {
+        async function initApp() {
             try {
-                const response = await fetch(GITHUB_JSON_URL);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                let text = await response.text();
-                text = text.replace(/,\s*([\]}])/g, '$1');
-                allMoviesData = JSON.parse(text);
-                renderHomeUI(allMoviesData);
+                // Fetch Movies & Ads in parallel
+                const [moviesRes, adsRes] = await Promise.all([
+                    fetch(GITHUB_MOVIES_URL),
+                    fetch(GITHUB_ADS_URL)
+                ]);
+
+                if (moviesRes.ok) {
+                    let text = await moviesRes.text();
+                    text = text.replace(/,\s*([\]}])/g, '$1');
+                    allMoviesData = JSON.parse(text);
+                    renderHomeUI(allMoviesData);
+                }
+
+                if (adsRes.ok) {
+                    let adsText = await adsRes.text();
+                    adsText = adsText.replace(/,\s*([\]}])/g, '$1');
+                    const adsJson = JSON.parse(adsText);
+                    if (Array.isArray(adsJson) && adsJson.length > 0) {
+                        adsConfig = adsJson[0];
+                    } else if (typeof adsJson === 'object') {
+                        adsConfig = adsJson;
+                    }
+                }
             } catch (error) {
-                console.error("Error fetching movies:", error);
+                console.error("Initialization error:", error);
                 newVideosRow.innerHTML = `<div class="loading" style="color: #ef4444;">Error: ${error.message}</div>`;
                 allVideosGrid.innerHTML = `<div class="loading" style="color: #ef4444; grid-column: span 2;">Error: ${error.message}</div>`;
             }
@@ -613,7 +756,6 @@
                 <div class="menu-icon" id="menuBtn">☰</div>
                 <div class="logo" onclick="goHome()">🔥 HotVibe</div>
             `;
-            // Re-bind menu button
             document.getElementById('menuBtn').addEventListener('click', () => {
                 sidebarDrawer.classList.add('open');
                 drawerOverlay.classList.add('open');
@@ -625,13 +767,13 @@
             newVideosRow.innerHTML = '';
             const newVideos = [...movies].reverse().slice(0, 10);
             newVideos.forEach(movie => {
-                newVideosRow.appendChild(createMovieCard(movie, false));
+                newVideosRow.appendChild(createMovieCard(movie));
             });
 
             allVideosGrid.innerHTML = '';
             const randomVideos = [...movies].sort(() => Math.random() - 0.5);
             randomVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie, true));
+                allVideosGrid.appendChild(createMovieCard(movie));
             });
         }
 
@@ -660,14 +802,14 @@
             const categoryVideos = shuffled.slice(0, 20);
 
             categoryVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie, true));
+                allVideosGrid.appendChild(createMovieCard(movie));
             });
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function createMovieCard(movie, isGrid) {
+        function createMovieCard(movie) {
             const card = document.createElement('div');
-            card.className = isGrid ? 'grid-card' : 'movie-card';
+            card.className = 'grid-card';
             
             const title = sampleTitles[Math.floor(Math.random() * sampleTitles.length)];
             const views = sampleViews[Math.floor(Math.random() * sampleViews.length)];
@@ -706,10 +848,24 @@
             watchTitle.textContent = title;
             watchMeta.textContent = `${views} • ${timeAgo}`;
 
+            // Reset Ad Unlock State for this video
+            currentAdStep = 1;
+            adClickTimestamp = 0;
+            adUnlockOverlay.style.display = 'flex';
+            mainVideoPlayer.style.display = 'none';
+            step1Indicator.className = "step-circle active";
+            step1Indicator.textContent = "1";
+            step2Indicator.className = "step-circle";
+            step2Indicator.textContent = "2";
+            line1.className = "step-line";
+            adActionBtn.textContent = "Complete Step 1";
+            adInstruction.textContent = "Please wait for the timer to finish to proceed.";
+
             partsContainer.innerHTML = '';
             if (movie.videos && movie.videos.length > 0) {
-                mainVideoPlayer.src = movie.videos[0];
-                // Paused by default
+                activeVideoUrl = movie.videos[0];
+                mainVideoPlayer.src = activeVideoUrl;
+                mainVideoPlayer.pause();
 
                 movie.videos.forEach((videoUrl, index) => {
                     const btn = document.createElement('button');
@@ -719,8 +875,16 @@
                     btn.addEventListener('click', () => {
                         document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
-                        mainVideoPlayer.src = videoUrl;
-                        mainVideoPlayer.play();
+                        activeVideoUrl = videoUrl;
+                        
+                        // Check if ad unlocked for this session/video
+                        if (adUnlockOverlay.style.display === 'none') {
+                            mainVideoPlayer.src = activeVideoUrl;
+                            mainVideoPlayer.play();
+                        } else {
+                            mainVideoPlayer.src = activeVideoUrl;
+                            mainVideoPlayer.pause();
+                        }
                     });
 
                     partsContainer.appendChild(btn);
@@ -731,13 +895,67 @@
             recommendedGrid.innerHTML = '';
             const recs = [...allMoviesData].sort(() => Math.random() - 0.5).slice(0, 20);
             recs.forEach(recMovie => {
-                recommendedGrid.appendChild(createMovieCard(recMovie, true));
+                recommendedGrid.appendChild(createMovieCard(recMovie));
             });
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        fetchMovies();
+        // Handle 2-Step Ad Click with 6-second Anti-Cheat Timer
+        window.handleAdStepClick = function() {
+            const now = Date.now();
+
+            if (adClickTimestamp === 0) {
+                // First click: Open ad link in new tab and start 6s timer
+                adClickTimestamp = now;
+                let targetLink = (currentAdStep === 1) ? adsConfig.direct_link_1 : adsConfig.direct_link_2;
+                
+                if (!targetLink) {
+                    targetLink = "https://beansnicerroller.com/ajhx3gup3?key=160a59d5002f5af7245daaec034941cd"; // fallback
+                }
+
+                window.open(targetLink, '_blank');
+                adActionBtn.textContent = "Verify Step " + currentAdStep;
+                adInstruction.textContent = "Please wait 6 seconds on the ad tab, then come back and click Verify!";
+            } else {
+                // Second click (Verify attempt): Check if 6 seconds have passed
+                const elapsed = now - adClickTimestamp;
+                if (elapsed < 6000) {
+                    const secondsLeft = Math.ceil((6000 - elapsed) / 1000);
+                    alert(`Please wait ${secondsLeft} more seconds and then return back!`);
+                    return;
+                }
+
+                // Time passed successfully!
+                if (currentAdStep === 1) {
+                    // Step 1 completed
+                    step1Indicator.className = "step-circle done";
+                    step1Indicator.textContent = "✓";
+                    line1.className = "step-line done";
+                    
+                    currentAdStep = 2;
+                    adClickTimestamp = 0; // reset for step 2
+                    step2Indicator.className = "step-circle active";
+                    adActionBtn.textContent = "Complete Step 2";
+                    adInstruction.textContent = "Step 1 verified! Click to complete Step 2.";
+                } else if (currentAdStep === 2) {
+                    // Step 2 completed -> Unlock video!
+                    step2Indicator.className = "step-circle done";
+                    step2Indicator.textContent = "✓";
+                    
+                    adActionBtn.textContent = "Unlocked!";
+                    adInstruction.textContent = "Enjoy your video!";
+
+                    setTimeout(() => {
+                        adUnlockOverlay.style.display = 'none';
+                        mainVideoPlayer.style.display = 'block';
+                        mainVideoPlayer.play();
+                    }, 800);
+                }
+            }
+        }
+
+        initApp();
     </script>
 </body>
 </html>
