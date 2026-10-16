@@ -229,7 +229,7 @@
             color: #fff;
         }
 
-        /* Horizontal Row for New Videos (Fixed proper proportions) */
+        /* Horizontal Row */
         .horizontal-scroll {
             display: flex;
             gap: 14px;
@@ -244,8 +244,8 @@
         }
 
         .movie-card {
-            min-width: 240px;
-            width: 240px;
+            min-width: 250px;
+            width: 250px;
             background-color: var(--surface-color);
             border-radius: 14px;
             overflow: hidden;
@@ -260,9 +260,9 @@
             transform: translateY(-3px);
         }
 
-        .movie-card .thumbnail-box {
+        .thumbnail-box {
             width: 100%;
-            height: 130px;
+            height: 140px;
             position: relative;
             background: #111827;
             display: flex;
@@ -332,7 +332,7 @@
             padding: 0 2px;
         }
 
-        /* Strict 2-Column Grid for All Videos */
+        /* Strict 2-Column Grid */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -385,10 +385,10 @@
             width: 100%;
             height: 100%;
             outline: none;
-            display: none; /* Hidden until ad steps completed */
+            display: none;
         }
 
-        /* Ad Unlock Box Overlay */
+        /* Ad Unlock Box Overlay (Compact & Clean) */
         .ad-unlock-overlay {
             position: absolute;
             top: 0;
@@ -401,37 +401,37 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
             text-align: center;
             z-index: 10;
         }
 
         .ad-unlock-overlay h2 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             background: linear-gradient(135deg, #ff2a6d, #ff6b00);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .ad-unlock-overlay p {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-secondary);
-            margin-bottom: 20px;
+            margin-bottom: 14px;
             line-height: 1.4;
         }
 
         .steps-row {
             display: flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 14px;
         }
 
         .step-circle {
-            width: 38px;
-            height: 38px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: var(--card-bg);
             border: 2px solid var(--border-color);
@@ -439,7 +439,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 13px;
             color: var(--text-secondary);
         }
 
@@ -452,11 +452,11 @@
         .step-circle.active {
             border-color: var(--accent-color);
             color: var(--accent-color);
-            box-shadow: 0 0 15px rgba(255, 42, 109, 0.4);
+            box-shadow: 0 0 12px rgba(255, 42, 109, 0.4);
         }
 
         .step-line {
-            width: 50px;
+            width: 40px;
             height: 3px;
             background: var(--border-color);
         }
@@ -469,14 +469,13 @@
             background: linear-gradient(135deg, #ff2a6d, #ff6b00);
             color: #fff;
             border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 14px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 42, 109, 0.4);
+            box-shadow: 0 4px 12px rgba(255, 42, 109, 0.3);
             transition: transform 0.2s;
-            max-width: 90%;
         }
 
         .ad-action-btn:hover {
@@ -489,6 +488,14 @@
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
+        }
+
+        .warning-text {
+            font-size: 11px;
+            color: #ef4444;
+            margin-top: 8px;
+            font-weight: 600;
+            min-height: 15px;
         }
 
         .watch-info {
@@ -576,7 +583,7 @@
         </div>
     </div>
 
-    <!-- Main Container (Home View) -->
+    <!-- Main Container (Home View - UNTOUCHED) -->
     <div class="container" id="homeView">
         <!-- New Videos Section -->
         <section id="newVideosSection">
@@ -611,8 +618,8 @@
             
             <!-- Ad Unlock Box Overlay -->
             <div class="ad-unlock-overlay" id="adUnlockOverlay">
-                <h2>Ready to Next</h2>
-                <p id="adInstruction">Please wait 6 seconds to proceed.<br>অনুগ্রহ করে ৬ সেকেন্ড অপেক্ষা করুন।</p>
+                <h2>ভিডিও দেখতে নিচের বাটনে ক্লিক করুন</h2>
+                <p>অ্যাড পেজে গিয়ে কমপক্ষে ৬ সেকেন্ড অপেক্ষা করুন।<br>Please visit the ad page and wait 6 seconds.</p>
                 
                 <div class="steps-row">
                     <div class="step-circle active" id="step1Indicator">1</div>
@@ -620,7 +627,8 @@
                     <div class="step-circle" id="step2Indicator">2</div>
                 </div>
 
-                <button class="ad-action-btn" id="adActionBtn" onclick="handleAdStepClick()">Complete Step 1 (অ্যাড ভিজিট করুন)</button>
+                <button class="ad-action-btn" id="adActionBtn" onclick="handleAdStepClick()">Step 1</button>
+                <div class="warning-text" id="warningText"></div>
             </div>
         </div>
 
@@ -654,10 +662,11 @@
         
         const adUnlockOverlay = document.getElementById('adUnlockOverlay');
         const adActionBtn = document.getElementById('adActionBtn');
-        const adInstruction = document.getElementById('adInstruction');
+        const adInstruction = document.querySelector('.ad-unlock-overlay p');
         const step1Indicator = document.getElementById('step1Indicator');
         const step2Indicator = document.getElementById('step2Indicator');
         const line1 = document.getElementById('line1');
+        const warningText = document.getElementById('warningText');
 
         const menuBtn = document.getElementById('menuBtn');
         const sidebarDrawer = document.getElementById('sidebarDrawer');
@@ -675,9 +684,9 @@
         
         // Ad unlock state
         let currentAdStep = 1; // 1 or 2
-        let countdownInterval = null;
-        let isTabAway = false;
         let adOpenedTime = 0;
+        let isTabAway = false;
+        let countdownInterval = null;
 
         // Drawer Menu Toggle
         menuBtn.addEventListener('click', () => {
@@ -858,10 +867,10 @@
             watchTitle.textContent = title;
             watchMeta.textContent = `${views} • ${timeAgo}`;
 
-            // Reset Ad Unlock State
+            // Reset Ad State
             currentAdStep = 1;
-            isTabAway = false;
             adOpenedTime = 0;
+            isTabAway = false;
             if (countdownInterval) clearInterval(countdownInterval);
 
             adUnlockOverlay.style.display = 'flex';
@@ -871,9 +880,10 @@
             step2Indicator.className = "step-circle";
             step2Indicator.textContent = "2";
             line1.className = "step-line";
-            adActionBtn.textContent = "Complete Step 1 (অ্যাড ভিজিট করুন)";
+            adActionBtn.textContent = "Step 1";
             adActionBtn.disabled = false;
-            adInstruction.innerHTML = "Please click below, visit the ad page and wait 6 seconds.<br>নিচের বাটনে ক্লিক করে ৬ সেকেন্ড অপেক্ষা করুন।";
+            adInstruction.innerHTML = "ভিডিও দেখতে নিচের বাটনে ক্লিক করে ৬ সেকেন্ড অপেক্ষা করুন।";
+            warningText.textContent = "";
 
             partsContainer.innerHTML = '';
             if (movie.videos && movie.videos.length > 0) {
@@ -894,11 +904,10 @@
                         }
                     });
 
-                    partsContainer.appendChild(btn);
+2                    partsContainer.appendChild(btn);
                 });
             }
 
-            // Render 20 random recommended videos
             recommendedGrid.innerHTML = '';
             const recs = [...allMoviesData].sort(() => Math.random() - 0.5).slice(0, 20);
             recs.forEach(recMovie => {
@@ -908,7 +917,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Strict Page Visibility & Tab-Away Anti-Cheat Check
+        // Strict Tab-Away & Timer Anti-Cheat Detection
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
                 if (adOpenedTime > 0) {
@@ -918,22 +927,22 @@
                 if (adOpenedTime > 0 && isTabAway) {
                     const elapsed = Date.now() - adOpenedTime;
                     if (elapsed < 6000) {
-                        // User came back too early! Reset everything for this step
+                        // Returned too early!
                         if (countdownInterval) clearInterval(countdownInterval);
-                        alert("You returned too early! You must wait 6 full seconds on the ad page.\nআপনি খুব দ্রুত ফিরে এসেছেন! অ্যাড পেজে অন্তত ৬ সেকেন্ড অপেক্ষা করতে হবে।");
+                        warningText.textContent = "৬ সেকেন্ড পূর্ণ হয়নি! স্টেপটি পুনরায় করুন।";
                         
-                        // Reset step button
                         adActionBtn.disabled = false;
-                        adActionBtn.textContent = `Complete Step ${currentAdStep} (অ্যাড ভিজিট করুন)`;
-                        adInstruction.innerHTML = `Please try again and wait 6 seconds.<br>দয়া করে আবার চেষ্টা করুন এবং ৬ সেকেন্ড অপেক্ষা করুন।`;
+                        adActionBtn.textContent = `Step ${currentAdStep}`;
+                        adInstruction.innerHTML = "অ্যাড পেজে ৬ সেকেন্ড অপেক্ষা করুন।";
                         adOpenedTime = 0;
                         isTabAway = false;
                     } else {
                         // Waited 6+ seconds successfully!
                         if (countdownInterval) clearInterval(countdownInterval);
+                        warningText.textContent = "";
                         adActionBtn.disabled = false;
-                        adActionBtn.textContent = `Verify Step ${currentAdStep} (ভেরিফাই করুন)`;
-                        adInstruction.innerHTML = `Timer finished! Click to verify.<br>সময় শেষ! ভেরিফাই করতে ক্লিক করুন।`;
+                        adActionBtn.textContent = `Step ${currentAdStep}`;
+                        adInstruction.innerHTML = "সময় শেষ! ভেরিফাই করতে ক্লিক করুন।";
                     }
                 }
             }
@@ -947,56 +956,64 @@
                 targetLink = "https://beansnicerroller.com/ajhx3gup3?key=160a59d5002f5af7245daaec034941cd";
             }
 
-            // If button is waiting for verification after returning
-            if (adActionBtn.textContent.includes("Verify")) {
-                if (currentAdStep === 1) {
-                    step1Indicator.className = "step-circle done";
-                    step1Indicator.textContent = "✓";
-                    line1.className = "step-line done";
-                    
-                    currentAdStep = 2;
-                    adOpenedTime = 0;
-                    isTabAway = false;
-                    step2Indicator.className = "step-circle active";
-                    adActionBtn.textContent = "Complete Step 2 (অ্যাড ভিজিট করুন)";
-                    adInstruction.innerHTML = "Step 1 verified! Complete Step 2 to watch video.<br>স্টেপ ১ ভেরিফাই হয়েছে! ভিডিও দেখতে স্টেপ ২ সম্পন্ন করুন।";
-                } else if (currentAdStep === 2) {
-                    step2Indicator.className = "step-circle done";
-                    step2Indicator.textContent = "✓";
-                    
-                    adActionBtn.textContent = "Unlocked! (আনলক হয়েছে)";
-                    adInstruction.innerHTML = "Enjoy your video!<br>আপনার ভিডিও উপভোগ করুন!";
-
-                    setTimeout(() => {
-                        adUnlockOverlay.style.display = 'none';
-                        mainVideoPlayer.style.display = 'block';
-                        mainVideoPlayer.play();
-                    }, 800);
-                }
-                return;
+            if (warningText.textContent.includes("পূর্ণ হয়নি")) {
+                warningText.textContent = "";
             }
 
-            // First click on Complete Step -> Open ad in new tab and start tracking
+            // Open ad in new tab and start tracking
             adOpenedTime = Date.now();
             isTabAway = false;
             window.open(targetLink, '_blank');
 
             adActionBtn.disabled = true;
             let timeLeft = 6;
-            adInstruction.innerHTML = `Please wait <b>${timeLeft}</b> seconds on ad page...<br>অ্যাড পেজে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন...`;
+            adInstruction.innerHTML = `অনুগ্রহ করে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন...`;
 
             if (countdownInterval) clearInterval(countdownInterval);
 
             countdownInterval = setInterval(() => {
                 timeLeft--;
                 if (timeLeft > 0) {
-                    adInstruction.innerHTML = `Please wait <b>${timeLeft}</b> seconds on ad page...<br>অ্যাড পেজে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন...`;
+                    adInstruction.innerHTML = `অনুগ্রহ করে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন...`;
                 } else {
                     clearInterval(countdownInterval);
-                    if (!isTabAway || (Date.now() - adOpenedTime) >= 6000) {
-                        adInstruction.innerHTML = `Timer finished! Click to verify.<br>সময় শেষ! ভেরিফাই করতে ক্লিক করুন।`;
-                        adActionBtn.textContent = `Verify Step ${currentAdStep} (ভেরিফাই করুন)`;
+                    // Check if user actually stayed away or came back early
+                    const totalElapsed = Date.now() - adOpenedTime;
+                    if (isTabAway && totalElapsed >= 5800) {
+                        // Success!
+                        if (currentAdStep === 1) {
+                            step1Indicator.className = "step-circle done";
+                            step1Indicator.textContent = "✓";
+                            line1.className = "step-line done";
+                            
+                            currentAdStep = 2;
+                            adOpenedTime = 0;
+                            isTabAway = false;
+                            step2Indicator.className = "step-circle active";
+                            adActionBtn.textContent = "Step 2";
+                            adActionBtn.disabled = false;
+                            adInstruction.innerHTML = "স্টেপ ১ সফল! এবার স্টেপ ২ সম্পন্ন করুন।";
+                        } else if (currentAdStep === 2) {
+                            step2Indicator.className = "step-circle done";
+                            step2Indicator.textContent = "✓";
+                            
+                            adActionBtn.textContent = "Unlocked!";
+                            adInstruction.innerHTML = "ভিডিও আনলক হয়েছে! উপভোগ করুন।";
+
+                            setTimeout(() => {
+                                adUnlockOverlay.style.display = 'none';
+                                mainVideoPlayer.style.display = 'block';
+                                mainVideoPlayer.play();
+                            }, 800);
+                        }
+                    } else {
+                        // Failed / Came back too early
+                        warningText.textContent = "স্টেপটি পুনরায় করুন।";
                         adActionBtn.disabled = false;
+                        adActionBtn.textContent = `Step ` + currentAdStep;
+                        adInstruction.innerHTML = "৬ সেকেন্ড অপেক্ষা করা হয়নি। পুনরায় চেষ্টা করুন।";
+                        adOpenedTime = 0;
+                        isTabAway = false;
                     }
                 }
             }, 1000);
