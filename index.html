@@ -63,7 +63,7 @@
         }
 
         .menu-icon {
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer;
             color: var(--text-primary);
         }
@@ -90,7 +90,7 @@
             box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
         }
 
-        /* Sidebar / Drawer Menu */
+        /* Sidebar Drawer Menu */
         .drawer {
             position: fixed;
             top: 0;
@@ -227,7 +227,7 @@
             color: #fff;
         }
 
-        /* Horizontal Row for New Videos */
+        /* Horizontal Row for New Videos (Fixed width & proper layout) */
         .horizontal-scroll {
             display: flex;
             gap: 14px;
@@ -242,10 +242,10 @@
         }
 
         .movie-card {
-            min-width: 260px;
-            width: 260px;
+            min-width: 250px;
+            width: 250px;
             background-color: var(--surface-color);
-            border-radius: 16px;
+            border-radius: 14px;
             overflow: hidden;
             cursor: pointer;
             flex-shrink: 0;
@@ -258,9 +258,9 @@
             transform: translateY(-3px);
         }
 
-        .thumbnail-box {
+        .movie-card .thumbnail-box {
             width: 100%;
-            height: 130px;
+            height: 140px;
             position: relative;
             background: #111827;
             display: flex;
@@ -338,7 +338,7 @@
             padding: 0 2px;
         }
 
-        /* Strict 2-Column Grid */
+        /* Strict 2-Column Grid for All Videos */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -362,6 +362,12 @@
         .grid-card .thumbnail-box {
             width: 100%;
             height: 110px;
+            position: relative;
+            background: #111827;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
         /* Video Player Modal */
@@ -640,14 +646,14 @@
             newVideosRow.innerHTML = '';
             const newVideos = [...movies].reverse().slice(0, 10);
             newVideos.forEach(movie => {
-                newVideosRow.appendChild(createMovieCard(movie));
+                newVideosRow.appendChild(createMovieCard(movie, false));
             });
 
             // All Videos
             allVideosGrid.innerHTML = '';
             const randomVideos = [...movies].sort(() => Math.random() - 0.5);
             randomVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie));
+                allVideosGrid.appendChild(createMovieCard(movie, true));
             });
         }
 
@@ -672,13 +678,13 @@
             }
 
             categoryVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie));
+                allVideosGrid.appendChild(createMovieCard(movie, true));
             });
         }
 
-        function createMovieCard(movie) {
+        function createMovieCard(movie, isGrid) {
             const card = document.createElement('div');
-            card.className = 'grid-card';
+            card.className = isGrid ? 'grid-card' : 'movie-card';
             
             const title = sampleTitles[Math.floor(Math.random() * sampleTitles.length)];
             const views = sampleViews[Math.floor(Math.random() * sampleViews.length)];
