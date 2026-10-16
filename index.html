@@ -1,1 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotflix - Movie Vault Web</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --surface-color: #111827;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --accent-color: #f97316;
+            --card-bg: #1f2937;
+        }
 
+        [data-theme="light"] {
+            --bg-color: #f3f4f6;
+            --surface-color: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --accent-color: #f97316;
+            --card-bg: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* Topbar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--card-bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent-color);
+            letter-spacing: 0.5px;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: none;
+            color: var(--text-primary);
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            color: var(--text-primary);
+        }
+
+        /* Horizontal Row for New Videos */
+        .horizontal-scroll {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scrollbar-width: none;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .movie-card {
+            min-width: 130px;
+            width: 130px;
+            height: 180px;
+            background-color: var(--card-bg);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .movie-card:hover {
+            transform: scale(1.04);
+        }
+
+        .movie-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .badge-hd {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Grid for All Videos */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+        }
+
+        .grid-card {
+            aspect-ratio: 2/3;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .grid-card:hover {
+            transform: scale(1.03);
+        }
+
+        .grid-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Video Player Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            width: 100%;
+            max-width: 700px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            outline: none;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: var(--card-bg);
+            border: none;
+            color: var(--text-primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .parts-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .part-btn {
+            background: var(--card-bg);
+            border: none;
+            color: var(--text-primary);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .part-btn.active {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="logo">Hotflix 🎬</div>
+        <button class="theme-toggle" id="themeToggleBtn">🌙 Dark</button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        
+        <!-- New Videos Section -->
+        <section>
+            <div class="section-title">New Videos</div>
+            <div class="horizontal-scroll" id="newVideosRow">
+                <div class="loading">Loading new videos...</div>
+            </div>
+        </section>
+
+        <!-- All Videos Section -->
+        <section>
+            <div class="section-title">All Videos</div>
+            <div class="grid-container" id="allVideosGrid">
+                <div class="loading" style="grid-column: span 3;">Loading all videos...</div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Video Modal / Player -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <div class="video-container">
+                <video id="mainVideoPlayer" controls autoplay></video>
+            </div>
+            <div class="modal-body">
+                <div class="modal-header">
+                    <div class="modal-title">Select Video Part</div>
+                    <button class="close-btn" id="closeModalBtn">&times;</button>
+                </div>
+                <div class="parts-container" id="partsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GITHUB_JSON_URL = "https://raw.githubusercontent.com/video3355/movie-vault-data/refs/heads/main/movies.json";
+        
+        const newVideosRow = document.getElementById('newVideosRow');
+        const allVideosGrid = document.getElementById('allVideosGrid');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const videoModal = document.getElementById('videoModal');
+        const mainVideoPlayer = document.getElementById('mainVideoPlayer');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const partsContainer = document.getElementById('partsContainer');
+
+        let allMoviesData = [];
+
+        // Theme Toggle
+        themeToggleBtn.addEventListener('click', () => {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            if(currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                themeToggleBtn.textContent = '☀️ Light';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeToggleBtn.textContent = '🌙 Dark';
+            }
+        });
+
+        // Fetch Movies from GitHub
+        async function fetchMovies() {
+            try {
+                const response = await fetch(GITHUB_JSON_URL);
+                const data = await response.json();
+                allMoviesData = data;
+                renderUI(data);
+            } catch (error) {
+                console.error("Error fetching movies:", error);
+                newVideosRow.innerHTML = '<div class="loading">Failed to load videos.</div>';
+                allVideosGrid.innerHTML = '<div class="loading">Failed to load videos.</div>';
+            }
+        }
+
+        function renderUI(movies) {
+            // 1. New Videos (Last 10 uploaded in reverse)
+            newVideosRow.innerHTML = '';
+            const newVideos = [...movies].reverse().slice(0, 10);
+            newVideos.forEach(movie => {
+                const card = createMovieCard(movie, false);
+                newVideosRow.appendChild(card);
+            });
+
+            // 2. All Videos (Randomized)
+            allVideosGrid.innerHTML = '';
+            const randomVideos = [...movies].sort(() => Math.random() - 0.5);
+            randomVideos.forEach(movie => {
+                const card = createMovieCard(movie, true);
+                allVideosGrid.appendChild(card);
+            });
+        }
+
+        function createMovieCard(movie, isGrid) {
+            const card = document.createElement('div');
+            card.className = isGrid ? 'grid-card' : 'movie-card';
+            
+            card.innerHTML = `
+                <img src="${movie.tham}" alt="Thumbnail" loading="lazy">
+                <div class="badge-hd">HD</div>
+            `;
+
+            card.addEventListener('click', () => {
+                openVideoModal(movie);
+            });
+
+            return card;
+        }
+
+        function openVideoModal(movie) {
+            partsContainer.innerHTML = '';
+            if(!movie.videos || movie.videos.length === 0) return;
+
+            // Play first video part by default
+            mainVideoPlayer.src = movie.videos[0];
+            mainVideoPlayer.play();
+
+            // Create buttons for parts
+            movie.videos.forEach((videoUrl, index) => {
+                const btn = document.createElement('button');
+                btn.className = `part-btn ${index === 0 ? 'active' : ''}`;
+                btn.textContent = `Part ${index + 1}`;
+                
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    mainVideoPlayer.src = videoUrl;
+                    mainVideoPlayer.play();
+                });
+
+                partsContainer.appendChild(btn);
+            });
+
+            videoModal.style.display = 'flex';
+        }
+
+        closeModalBtn.addEventListener('click', () => {
+            mainVideoPlayer.pause();
+            mainVideoPlayer.src = '';
+            videoModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if(e.target === videoModal) {
+                mainVideoPlayer.pause();
+                mainVideoPlayer.src = '';
+                videoModal.style.display = 'none';
+            }
+        });
+
+        // Initialize
+        fetchMovies();
+    </script>
+</body>
+</html>
