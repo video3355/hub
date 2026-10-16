@@ -229,7 +229,7 @@
             color: #fff;
         }
 
-        /* Horizontal Row */
+        /* Horizontal Row for New Videos (Fixed proper proportions) */
         .horizontal-scroll {
             display: flex;
             gap: 14px;
@@ -244,8 +244,8 @@
         }
 
         .movie-card {
-            min-width: 250px;
-            width: 250px;
+            min-width: 240px;
+            width: 240px;
             background-color: var(--surface-color);
             border-radius: 14px;
             overflow: hidden;
@@ -260,9 +260,9 @@
             transform: translateY(-3px);
         }
 
-        .thumbnail-box {
+        .movie-card .thumbnail-box {
             width: 100%;
-            height: 140px;
+            height: 130px;
             position: relative;
             background: #111827;
             display: flex;
@@ -332,7 +332,7 @@
             padding: 0 2px;
         }
 
-        /* Strict 2-Column Grid */
+        /* Strict 2-Column Grid for All Videos */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -395,43 +395,43 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(13, 19, 34, 0.96);
+            background: rgba(13, 19, 34, 0.98);
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
             text-align: center;
             z-index: 10;
         }
 
         .ad-unlock-overlay h2 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             background: linear-gradient(135deg, #ff2a6d, #ff6b00);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .ad-unlock-overlay p {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.5;
+            margin-bottom: 20px;
+            line-height: 1.4;
         }
 
         .steps-row {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 14px;
+            margin-bottom: 20px;
         }
 
         .step-circle {
-            width: 44px;
-            height: 44px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             background: var(--card-bg);
             border: 2px solid var(--border-color);
@@ -439,7 +439,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 15px;
             color: var(--text-secondary);
         }
 
@@ -456,7 +456,7 @@
         }
 
         .step-line {
-            width: 60px;
+            width: 50px;
             height: 3px;
             background: var(--border-color);
         }
@@ -469,17 +469,18 @@
             background: linear-gradient(135deg, #ff2a6d, #ff6b00);
             color: #fff;
             border: none;
-            padding: 14px 28px;
-            border-radius: 14px;
-            font-size: 15px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 6px 20px rgba(255, 42, 109, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 42, 109, 0.4);
             transition: transform 0.2s;
+            max-width: 90%;
         }
 
         .ad-action-btn:hover {
-            transform: scale(1.03);
+            transform: scale(1.02);
         }
 
         .ad-action-btn:disabled {
@@ -619,7 +620,7 @@
                     <div class="step-circle" id="step2Indicator">2</div>
                 </div>
 
-                <button class="ad-action-btn" id="adActionBtn" onclick="handleAdStepClick()">Complete Step 1</button>
+                <button class="ad-action-btn" id="adActionBtn" onclick="handleAdStepClick()">Complete Step 1 (অ্যাড ভিজিট করুন)</button>
             </div>
         </div>
 
@@ -675,7 +676,8 @@
         // Ad unlock state
         let currentAdStep = 1; // 1 or 2
         let countdownInterval = null;
-        let isTimerFinished = false;
+        let isTabAway = false;
+        let adOpenedTime = 0;
 
         // Drawer Menu Toggle
         menuBtn.addEventListener('click', () => {
@@ -775,13 +777,13 @@
             newVideosRow.innerHTML = '';
             const newVideos = [...movies].reverse().slice(0, 10);
             newVideos.forEach(movie => {
-                newVideosRow.appendChild(createMovieCard(movie));
+                newVideosRow.appendChild(createMovieCard(movie, false));
             });
 
             allVideosGrid.innerHTML = '';
             const randomVideos = [...movies].sort(() => Math.random() - 0.5);
             randomVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie));
+                allVideosGrid.appendChild(createMovieCard(movie, true));
             });
         }
 
@@ -810,14 +812,14 @@
             const categoryVideos = shuffled.slice(0, 20);
 
             categoryVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie));
+                allVideosGrid.appendChild(createMovieCard(movie, true));
             });
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function createMovieCard(movie) {
+        function createMovieCard(movie, isGrid) {
             const card = document.createElement('div');
-            card.className = 'grid-card';
+            card.className = isGrid ? 'grid-card' : 'movie-card';
             
             const title = sampleTitles[Math.floor(Math.random() * sampleTitles.length)];
             const views = sampleViews[Math.floor(Math.random() * sampleViews.length)];
@@ -858,7 +860,10 @@
 
             // Reset Ad Unlock State
             currentAdStep = 1;
-            isTimerFinished = false;
+            isTabAway = false;
+            adOpenedTime = 0;
+            if (countdownInterval) clearInterval(countdownInterval);
+
             adUnlockOverlay.style.display = 'flex';
             mainVideoPlayer.style.display = 'none';
             step1Indicator.className = "step-circle active";
@@ -897,60 +902,61 @@
             recommendedGrid.innerHTML = '';
             const recs = [...allMoviesData].sort(() => Math.random() - 0.5).slice(0, 20);
             recs.forEach(recMovie => {
-                recommendedGrid.appendChild(createMovieCard(recMovie));
+                recommendedGrid.appendChild(createMovieCard(recMovie, true));
             });
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Strict 6-Second On-Page Countdown Timer (Must wait 6s on our page before verifying)
+        // Strict Page Visibility & Tab-Away Anti-Cheat Check
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                if (adOpenedTime > 0) {
+                    isTabAway = true;
+                }
+            } else if (document.visibilityState === 'visible') {
+                if (adOpenedTime > 0 && isTabAway) {
+                    const elapsed = Date.now() - adOpenedTime;
+                    if (elapsed < 6000) {
+                        // User came back too early! Reset everything for this step
+                        if (countdownInterval) clearInterval(countdownInterval);
+                        alert("You returned too early! You must wait 6 full seconds on the ad page.\nআপনি খুব দ্রুত ফিরে এসেছেন! অ্যাড পেজে অন্তত ৬ সেকেন্ড অপেক্ষা করতে হবে।");
+                        
+                        // Reset step button
+                        adActionBtn.disabled = false;
+                        adActionBtn.textContent = `Complete Step ${currentAdStep} (অ্যাড ভিজিট করুন)`;
+                        adInstruction.innerHTML = `Please try again and wait 6 seconds.<br>দয়া করে আবার চেষ্টা করুন এবং ৬ সেকেন্ড অপেক্ষা করুন।`;
+                        adOpenedTime = 0;
+                        isTabAway = false;
+                    } else {
+                        // Waited 6+ seconds successfully!
+                        if (countdownInterval) clearInterval(countdownInterval);
+                        adActionBtn.disabled = false;
+                        adActionBtn.textContent = `Verify Step ${currentAdStep} (ভেরিফাই করুন)`;
+                        adInstruction.innerHTML = `Timer finished! Click to verify.<br>সময় শেষ! ভেরিফাই করতে ক্লিক করুন।`;
+                    }
+                }
+            }
+        });
+
         window.handleAdStepClick = function() {
+            if (adActionBtn.disabled) return;
+
             let targetLink = (currentAdStep === 1) ? adsConfig.direct_link_1 : adsConfig.direct_link_2;
             if (!targetLink) {
                 targetLink = "https://beansnicerroller.com/ajhx3gup3?key=160a59d5002f5af7245daaec034941cd";
             }
 
-            // Open ad link in new tab
-            window.open(targetLink, '_blank');
-
-            // Disable button and start mandatory 6-second countdown
-            adActionBtn.disabled = true;
-            let timeLeft = 6;
-            
-            adInstruction.innerHTML = `Please wait <b>${timeLeft}</b> seconds...<br>অনুগ্রহ করে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন।`;
-
-            if (countdownInterval) clearInterval(countdownInterval);
-
-            countdownInterval = setInterval(() => {
-                timeLeft--;
-                if (timeLeft > 0) {
-                    adInstruction.innerHTML = `Please wait <b>${timeLeft}</b> seconds...<br>অনুগ্রহ করে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন।`;
-                } else {
-                    clearInterval(countdownInterval);
-                    adInstruction.innerHTML = `Step ${currentAdStep} timer finished! Click to verify.<br>টাইম শেষ! ভেরিফাই করতে ক্লিক করুন।`;
-                    adActionBtn.textContent = `Verify Step ${currentAdStep} (ভেরিফাই করুন)`;
-                    adActionBtn.disabled = false;
-                }
-            }, 1000);
-        }
-
-        // Intercept action button click when timer finishes to proceed to next step or unlock video
-        const originalClickHandler = window.handleAdStepClick;
-        window.handleAdStepClick = function() {
-            // If button is already disabled during countdown, do nothing
-            if (adActionBtn.disabled) return;
-
-            // If timer has not started yet, start it
-            if (adActionBtn.textContent.includes("Complete")) {
-                originalClickHandler();
-            } else {
-                // Timer finished -> Verify and proceed!
+            // If button is waiting for verification after returning
+            if (adActionBtn.textContent.includes("Verify")) {
                 if (currentAdStep === 1) {
                     step1Indicator.className = "step-circle done";
                     step1Indicator.textContent = "✓";
                     line1.className = "step-line done";
                     
                     currentAdStep = 2;
+                    adOpenedTime = 0;
+                    isTabAway = false;
                     step2Indicator.className = "step-circle active";
                     adActionBtn.textContent = "Complete Step 2 (অ্যাড ভিজিট করুন)";
                     adInstruction.innerHTML = "Step 1 verified! Complete Step 2 to watch video.<br>স্টেপ ১ ভেরিফাই হয়েছে! ভিডিও দেখতে স্টেপ ২ সম্পন্ন করুন।";
@@ -967,7 +973,33 @@
                         mainVideoPlayer.play();
                     }, 800);
                 }
+                return;
             }
+
+            // First click on Complete Step -> Open ad in new tab and start tracking
+            adOpenedTime = Date.now();
+            isTabAway = false;
+            window.open(targetLink, '_blank');
+
+            adActionBtn.disabled = true;
+            let timeLeft = 6;
+            adInstruction.innerHTML = `Please wait <b>${timeLeft}</b> seconds on ad page...<br>অ্যাড পেজে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন...`;
+
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    adInstruction.innerHTML = `Please wait <b>${timeLeft}</b> seconds on ad page...<br>অ্যাড পেজে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন...`;
+                } else {
+                    clearInterval(countdownInterval);
+                    if (!isTabAway || (Date.now() - adOpenedTime) >= 6000) {
+                        adInstruction.innerHTML = `Timer finished! Click to verify.<br>সময় শেষ! ভেরিফাই করতে ক্লিক করুন।`;
+                        adActionBtn.textContent = `Verify Step ${currentAdStep} (ভেরিফাই করুন)`;
+                        adActionBtn.disabled = false;
+                    }
+                }
+            }, 1000);
         }
 
         initApp();
