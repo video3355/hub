@@ -395,7 +395,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(13, 19, 34, 0.95);
+            background: rgba(13, 19, 34, 0.96);
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
@@ -419,6 +419,7 @@
             font-size: 13px;
             color: var(--text-secondary);
             margin-bottom: 24px;
+            line-height: 1.5;
         }
 
         .steps-row {
@@ -479,6 +480,14 @@
 
         .ad-action-btn:hover {
             transform: scale(1.03);
+        }
+
+        .ad-action-btn:disabled {
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
 
         .watch-info {
@@ -602,7 +611,7 @@
             <!-- Ad Unlock Box Overlay -->
             <div class="ad-unlock-overlay" id="adUnlockOverlay">
                 <h2>Ready to Next</h2>
-                <p id="adInstruction">Please wait for the timer to finish to proceed.</p>
+                <p id="adInstruction">Please wait 6 seconds to proceed.<br>অনুগ্রহ করে ৬ সেকেন্ড অপেক্ষা করুন।</p>
                 
                 <div class="steps-row">
                     <div class="step-circle active" id="step1Indicator">1</div>
@@ -665,8 +674,8 @@
         
         // Ad unlock state
         let currentAdStep = 1; // 1 or 2
-        let adClickTimestamp = 0;
-        let activeVideoUrl = "";
+        let countdownInterval = null;
+        let isTimerFinished = false;
 
         // Drawer Menu Toggle
         menuBtn.addEventListener('click', () => {
@@ -716,7 +725,6 @@
 
         async function initApp() {
             try {
-                // Fetch Movies & Ads in parallel
                 const [moviesRes, adsRes] = await Promise.all([
                     fetch(GITHUB_MOVIES_URL),
                     fetch(GITHUB_ADS_URL)
@@ -848,9 +856,9 @@
             watchTitle.textContent = title;
             watchMeta.textContent = `${views} • ${timeAgo}`;
 
-            // Reset Ad Unlock State for this video
+            // Reset Ad Unlock State
             currentAdStep = 1;
-            adClickTimestamp = 0;
+            isTimerFinished = false;
             adUnlockOverlay.style.display = 'flex';
             mainVideoPlayer.style.display = 'none';
             step1Indicator.className = "step-circle active";
@@ -858,13 +866,13 @@
             step2Indicator.className = "step-circle";
             step2Indicator.textContent = "2";
             line1.className = "step-line";
-            adActionBtn.textContent = "Complete Step 1";
-            adInstruction.textContent = "Please wait for the timer to finish to proceed.";
+            adActionBtn.textContent = "Complete Step 1 (অ্যাড ভিজিট করুন)";
+            adActionBtn.disabled = false;
+            adInstruction.innerHTML = "Please click below, visit the ad page and wait 6 seconds.<br>নিচের বাটনে ক্লিক করে ৬ সেকেন্ড অপেক্ষা করুন।";
 
             partsContainer.innerHTML = '';
             if (movie.videos && movie.videos.length > 0) {
-                activeVideoUrl = movie.videos[0];
-                mainVideoPlayer.src = activeVideoUrl;
+                mainVideoPlayer.src = movie.videos[0];
                 mainVideoPlayer.pause();
 
                 movie.videos.forEach((videoUrl, index) => {
@@ -875,15 +883,9 @@
                     btn.addEventListener('click', () => {
                         document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
-                        activeVideoUrl = videoUrl;
-                        
-                        // Check if ad unlocked for this session/video
+                        mainVideoPlayer.src = videoUrl;
                         if (adUnlockOverlay.style.display === 'none') {
-                            mainVideoPlayer.src = activeVideoUrl;
                             mainVideoPlayer.play();
-                        } else {
-                            mainVideoPlayer.src = activeVideoUrl;
-                            mainVideoPlayer.pause();
                         }
                     });
 
@@ -901,50 +903,63 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Handle 2-Step Ad Click with 6-second Anti-Cheat Timer
+        // Strict 6-Second On-Page Countdown Timer (Must wait 6s on our page before verifying)
         window.handleAdStepClick = function() {
-            const now = Date.now();
+            let targetLink = (currentAdStep === 1) ? adsConfig.direct_link_1 : adsConfig.direct_link_2;
+            if (!targetLink) {
+                targetLink = "https://beansnicerroller.com/ajhx3gup3?key=160a59d5002f5af7245daaec034941cd";
+            }
 
-            if (adClickTimestamp === 0) {
-                // First click: Open ad link in new tab and start 6s timer
-                adClickTimestamp = now;
-                let targetLink = (currentAdStep === 1) ? adsConfig.direct_link_1 : adsConfig.direct_link_2;
-                
-                if (!targetLink) {
-                    targetLink = "https://beansnicerroller.com/ajhx3gup3?key=160a59d5002f5af7245daaec034941cd"; // fallback
+            // Open ad link in new tab
+            window.open(targetLink, '_blank');
+
+            // Disable button and start mandatory 6-second countdown
+            adActionBtn.disabled = true;
+            let timeLeft = 6;
+            
+            adInstruction.innerHTML = `Please wait <b>${timeLeft}</b> seconds...<br>অনুগ্রহ করে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন।`;
+
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    adInstruction.innerHTML = `Please wait <b>${timeLeft}</b> seconds...<br>অনুগ্রহ করে <b>${timeLeft}</b> সেকেন্ড অপেক্ষা করুন।`;
+                } else {
+                    clearInterval(countdownInterval);
+                    adInstruction.innerHTML = `Step ${currentAdStep} timer finished! Click to verify.<br>টাইম শেষ! ভেরিফাই করতে ক্লিক করুন।`;
+                    adActionBtn.textContent = `Verify Step ${currentAdStep} (ভেরিফাই করুন)`;
+                    adActionBtn.disabled = false;
                 }
+            }, 1000);
+        }
 
-                window.open(targetLink, '_blank');
-                adActionBtn.textContent = "Verify Step " + currentAdStep;
-                adInstruction.textContent = "Please wait 6 seconds on the ad tab, then come back and click Verify!";
+        // Intercept action button click when timer finishes to proceed to next step or unlock video
+        const originalClickHandler = window.handleAdStepClick;
+        window.handleAdStepClick = function() {
+            // If button is already disabled during countdown, do nothing
+            if (adActionBtn.disabled) return;
+
+            // If timer has not started yet, start it
+            if (adActionBtn.textContent.includes("Complete")) {
+                originalClickHandler();
             } else {
-                // Second click (Verify attempt): Check if 6 seconds have passed
-                const elapsed = now - adClickTimestamp;
-                if (elapsed < 6000) {
-                    const secondsLeft = Math.ceil((6000 - elapsed) / 1000);
-                    alert(`Please wait ${secondsLeft} more seconds and then return back!`);
-                    return;
-                }
-
-                // Time passed successfully!
+                // Timer finished -> Verify and proceed!
                 if (currentAdStep === 1) {
-                    // Step 1 completed
                     step1Indicator.className = "step-circle done";
                     step1Indicator.textContent = "✓";
                     line1.className = "step-line done";
                     
                     currentAdStep = 2;
-                    adClickTimestamp = 0; // reset for step 2
                     step2Indicator.className = "step-circle active";
-                    adActionBtn.textContent = "Complete Step 2";
-                    adInstruction.textContent = "Step 1 verified! Click to complete Step 2.";
+                    adActionBtn.textContent = "Complete Step 2 (অ্যাড ভিজিট করুন)";
+                    adInstruction.innerHTML = "Step 1 verified! Complete Step 2 to watch video.<br>স্টেপ ১ ভেরিফাই হয়েছে! ভিডিও দেখতে স্টেপ ২ সম্পন্ন করুন।";
                 } else if (currentAdStep === 2) {
-                    // Step 2 completed -> Unlock video!
                     step2Indicator.className = "step-circle done";
                     step2Indicator.textContent = "✓";
                     
-                    adActionBtn.textContent = "Unlocked!";
-                    adInstruction.textContent = "Enjoy your video!";
+                    adActionBtn.textContent = "Unlocked! (আনলক হয়েছে)";
+                    adInstruction.innerHTML = "Enjoy your video!<br>আপনার ভিডিও উপভোগ করুন!";
 
                     setTimeout(() => {
                         adUnlockOverlay.style.display = 'none';
