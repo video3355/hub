@@ -333,18 +333,23 @@
             }
         });
 
-        // Fetch Movies from GitHub with Detailed Error Logging
+        // Fetch Movies with Auto-Sanitizer (fixes trailing commas in JSON automatically)
         async function fetchMovies() {
             try {
                 const response = await fetch(GITHUB_JSON_URL);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const data = await response.json();
+                let text = await response.text();
+                
+                // Remove trailing commas before closing brackets/braces (e.g., [ ... }, ] -> [ ... } ])
+                text = text.replace(/,\s*([\]}])/g, '$1');
+                
+                const data = JSON.parse(text);
                 renderUI(data);
             } catch (error) {
                 console.error("Error fetching movies:", error);
-                newVideosRow.innerHTML = `<div class="loading" style="color: #ef4444;">Error: ${error.message} (Check internet or JSON URL)</div>`;
+                newVideosRow.innerHTML = `<div class="loading" style="color: #ef4444;">Error: ${error.message}</div>`;
                 allVideosGrid.innerHTML = `<div class="loading" style="color: #ef4444; grid-column: span 3;">Error: ${error.message}</div>`;
             }
         }
