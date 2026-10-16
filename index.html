@@ -422,11 +422,11 @@
             const card = document.createElement('div');
             card.className = isGrid ? 'grid-card' : 'movie-card';
             
-            // Pass thumbnail through Weserv Image Proxy (Acts like Glide) to bypass CORS & Hotlink blocking
-            const proxiedThumb = `https://wsrv.nl/?url=${encodeURIComponent(movie.tham)}&w=400&fit=cover`;
+            // Force convert image to PNG via weserv image proxy and add backup onerror fallback
+            const proxiedThumb = `https://wsrv.nl/?url=${encodeURIComponent(movie.tham)}&w=400&h=600&fit=cover&output=png`;
 
             card.innerHTML = `
-                <img src="${proxiedThumb}" alt="Thumbnail" loading="lazy">
+                <img src="${proxiedThumb}" alt="Thumbnail" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500';">
                 <div class="badge-hd">HD</div>
             `;
 
