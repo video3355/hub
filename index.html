@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HotVibe - Movie Vault</title>
+    <title>HotVibe - Watch</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -62,7 +62,7 @@
             gap: 12px;
         }
 
-        .menu-icon {
+        .menu-icon, .back-icon {
             font-size: 20px;
             cursor: pointer;
             color: var(--text-primary);
@@ -75,6 +75,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: 0.5px;
+            cursor: pointer;
         }
 
         .telegram-btn {
@@ -129,7 +130,6 @@
             color: var(--text-primary);
             font-size: 20px;
             cursor: pointer;
-            -webkit-text-fill-color: var(--text-primary);
         }
 
         .drawer-items {
@@ -227,7 +227,7 @@
             color: #fff;
         }
 
-        /* Horizontal Row for New Videos (Fixed width & proper layout) */
+        /* Horizontal Row */
         .horizontal-scroll {
             display: flex;
             gap: 14px;
@@ -258,7 +258,7 @@
             transform: translateY(-3px);
         }
 
-        .movie-card .thumbnail-box {
+        .thumbnail-box {
             width: 100%;
             height: 140px;
             position: relative;
@@ -273,14 +273,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-
-        .img-error-text {
-            color: #ef4444;
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-            padding: 10px;
         }
 
         .badge-hd {
@@ -338,7 +330,7 @@
             padding: 0 2px;
         }
 
-        /* Strict 2-Column Grid for All Videos */
+        /* Strict 2-Column Grid */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -370,76 +362,45 @@
             overflow: hidden;
         }
 
-        /* Video Player Modal */
-        .modal {
+        /* YouTube-Style Watch View */
+        #watchView {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        .modal-content {
-            background: var(--surface-color);
-            width: 100%;
-            max-width: 700px;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .video-container {
+        .youtube-player-container {
             width: 100%;
             aspect-ratio: 16/9;
             background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         }
 
-        video {
+        .youtube-player-container video {
             width: 100%;
             height: 100%;
             outline: none;
         }
 
-        .modal-body {
-            padding: 20px;
+        .watch-info {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .modal-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .close-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            cursor: pointer;
+        .watch-title {
             font-size: 18px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .watch-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
         }
 
         .parts-container {
@@ -479,9 +440,9 @@
 
     <!-- Topbar -->
     <div class="topbar">
-        <div class="logo-area">
+        <div class="logo-area" id="topbarLeft">
             <div class="menu-icon" id="menuBtn">☰</div>
-            <div class="logo">🔥 HotVibe</div>
+            <div class="logo" onclick="goHome()">🔥 HotVibe</div>
         </div>
         <a href="https://t.me/+MekugTd_5Pth2NE1" target="_blank" class="telegram-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.25.38-.51 1.06-.78 4.16-1.81 6.94-3.01 8.34-3.6 3.97-1.66 4.79-1.95 5.33-1.96.12 0 .38.03.55.17.14.12.18.28.2.45-.02.07-.02.13-.04.22z"/></svg>
@@ -508,9 +469,8 @@
         </div>
     </div>
 
-    <!-- Main Container -->
-    <div class="container">
-        
+    <!-- Main Container (Home View) -->
+    <div class="container" id="homeView">
         <!-- New Videos Section -->
         <section id="newVideosSection">
             <div class="section-header">
@@ -535,34 +495,39 @@
                 <div class="loading" style="grid-column: span 2;">Loading all videos...</div>
             </div>
         </section>
-
     </div>
 
-    <!-- Video Modal / Player -->
-    <div class="modal" id="videoModal">
-        <div class="modal-content">
-            <div class="video-container">
-                <video id="mainVideoPlayer" controls autoplay></video>
-            </div>
-            <div class="modal-body">
-                <div class="modal-header">
-                    <div class="modal-title">Select Video Part</div>
-                    <button class="close-btn" id="closeModalBtn">&times;</button>
-                </div>
-                <div class="parts-container" id="partsContainer"></div>
-            </div>
+    <!-- YouTube-Style Watch View -->
+    <div class="container" id="watchView">
+        <div class="youtube-player-container">
+            <video id="mainVideoPlayer" controls></video>
         </div>
+        <div class="watch-info">
+            <div class="watch-title" id="watchTitle">Video Title</div>
+            <div class="watch-meta" id="watchMeta">125K views • 2 hours ago</div>
+            <div class="parts-container" id="partsContainer"></div>
+        </div>
+
+        <div class="section-header" style="margin-top: 25px;">
+            <div class="section-title">💡 Recommended Videos</div>
+        </div>
+        <div class="grid-container" id="recommendedGrid"></div>
     </div>
 
     <script>
         const GITHUB_JSON_URL = "https://raw.githubusercontent.com/video3355/movie-vault-data/main/movies.json";
         
+        const homeView = document.getElementById('homeView');
+        const watchView = document.getElementById('watchView');
         const newVideosRow = document.getElementById('newVideosRow');
         const allVideosGrid = document.getElementById('allVideosGrid');
-        const videoModal = document.getElementById('videoModal');
+        const recommendedGrid = document.getElementById('recommendedGrid');
+        
         const mainVideoPlayer = document.getElementById('mainVideoPlayer');
-        const closeModalBtn = document.getElementById('closeModalBtn');
+        const watchTitle = document.getElementById('watchTitle');
+        const watchMeta = document.getElementById('watchMeta');
         const partsContainer = document.getElementById('partsContainer');
+        const topbarLeft = document.getElementById('topbarLeft');
         
         const menuBtn = document.getElementById('menuBtn');
         const sidebarDrawer = document.getElementById('sidebarDrawer');
@@ -639,25 +604,42 @@
         }
 
         function renderHomeUI(movies) {
+            homeView.style.display = 'block';
+            watchView.style.display = 'none';
+            mainVideoPlayer.pause();
+            mainVideoPlayer.src = '';
+            
+            topbarLeft.innerHTML = `
+                <div class="menu-icon" id="menuBtn">☰</div>
+                <div class="logo" onclick="goHome()">🔥 HotVibe</div>
+            `;
+            // Re-bind menu button
+            document.getElementById('menuBtn').addEventListener('click', () => {
+                sidebarDrawer.classList.add('open');
+                drawerOverlay.classList.add('open');
+            });
+
             newVideosSection.style.display = 'block';
             allSectionTitle.textContent = "⏹️ All Video";
 
-            // New Videos
             newVideosRow.innerHTML = '';
             const newVideos = [...movies].reverse().slice(0, 10);
             newVideos.forEach(movie => {
-                newVideosRow.appendChild(createMovieCard(movie, false));
+                newVideosRow.appendChild(createMovieCard(movie));
             });
 
-            // All Videos
             allVideosGrid.innerHTML = '';
             const randomVideos = [...movies].sort(() => Math.random() - 0.5);
             randomVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie, true));
+                allVideosGrid.appendChild(createMovieCard(movie));
             });
         }
 
-        // Category Filter (Shows 20 random videos for that category)
+        window.goHome = function() {
+            renderHomeUI(allMoviesData);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         window.filterCategory = function(categoryName) {
             closeDrawer();
             if (categoryName === 'Home') {
@@ -665,26 +647,27 @@
                 return;
             }
 
-            newVideosSection.style.display = 'none'; // Hide New Videos section in category view
+            homeView.style.display = 'block';
+            watchView.style.display = 'none';
+            mainVideoPlayer.pause();
+            mainVideoPlayer.src = '';
+
+            newVideosSection.style.display = 'none';
             allSectionTitle.textContent = `📁 ${categoryName} Videos`;
             
             allVideosGrid.innerHTML = '';
             const shuffled = [...allMoviesData].sort(() => Math.random() - 0.5);
-            const categoryVideos = shuffled.slice(0, 20); // 20 random videos
-
-            if(categoryVideos.length === 0) {
-                allVideosGrid.innerHTML = `<div class="loading" style="grid-column: span 2;">No videos found in ${categoryName}</div>`;
-                return;
-            }
+            const categoryVideos = shuffled.slice(0, 20);
 
             categoryVideos.forEach(movie => {
-                allVideosGrid.appendChild(createMovieCard(movie, true));
+                allVideosGrid.appendChild(createMovieCard(movie));
             });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function createMovieCard(movie, isGrid) {
+        function createMovieCard(movie) {
             const card = document.createElement('div');
-            card.className = isGrid ? 'grid-card' : 'movie-card';
+            card.className = 'grid-card';
             
             const title = sampleTitles[Math.floor(Math.random() * sampleTitles.length)];
             const views = sampleViews[Math.floor(Math.random() * sampleViews.length)];
@@ -694,8 +677,7 @@
             card.innerHTML = `
                 <div class="thumbnail-box">
                     <img src="${movie.tham}" alt="Thumbnail" loading="lazy" 
-                         onerror="this.onerror=null; this.src='https://wsrv.nl/?url=' + encodeURIComponent('${movie.tham}') + '&output=png'; this.onerror=function(){ this.style.display='none'; this.nextElementSibling.style.display='block'; };">
-                    <div class="img-error-text" style="display:none;">Image load failed</div>
+                         onerror="this.onerror=null; this.src='https://wsrv.nl/?url=' + encodeURIComponent('${movie.tham}') + '&output=png';">
                     <div class="badge-hd">HD</div>
                     <div class="badge-duration">${duration}</div>
                 </div>
@@ -708,48 +690,52 @@
                 </div>
             `;
 
-            card.addEventListener('click', () => openVideoModal(movie));
+            card.addEventListener('click', () => openWatchPage(movie, title, views, timeAgo));
             return card;
         }
 
-        function openVideoModal(movie) {
+        function openWatchPage(movie, title, views, timeAgo) {
+            homeView.style.display = 'none';
+            watchView.style.display = 'block';
+
+            topbarLeft.innerHTML = `
+                <div class="back-icon" onclick="goHome()">← Back</div>
+                <div class="logo" onclick="goHome()">🔥 HotVibe</div>
+            `;
+
+            watchTitle.textContent = title;
+            watchMeta.textContent = `${views} • ${timeAgo}`;
+
             partsContainer.innerHTML = '';
-            if(!movie.videos || movie.videos.length === 0) return;
+            if (movie.videos && movie.videos.length > 0) {
+                mainVideoPlayer.src = movie.videos[0];
+                // Paused by default (no autoplay)
 
-            mainVideoPlayer.src = movie.videos[0];
-            mainVideoPlayer.play();
+                movie.videos.forEach((videoUrl, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = `part-btn ${index === 0 ? 'active' : ''}`;
+                    btn.textContent = `Part ${index + 1}`;
+                    
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        mainVideoPlayer.src = videoUrl;
+                        mainVideoPlayer.play();
+                    });
 
-            movie.videos.forEach((videoUrl, index) => {
-                const btn = document.createElement('button');
-                btn.className = `part-btn ${index === 0 ? 'active' : ''}`;
-                btn.textContent = `Part ${index + 1}`;
-                
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    mainVideoPlayer.src = videoUrl;
-                    mainVideoPlayer.play();
+                    partsContainer.appendChild(btn);
                 });
+            }
 
-                partsContainer.appendChild(btn);
+            // Render 20 random recommended videos
+            recommendedGrid.innerHTML = '';
+            const recs = [...allMoviesData].sort(() => Math.random() - 0.5).slice(0, 20);
+            recs.forEach(recMovie => {
+                recommendedGrid.appendChild(createMovieCard(recMovie));
             });
 
-            videoModal.style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        closeModalBtn.addEventListener('click', () => {
-            mainVideoPlayer.pause();
-            mainVideoPlayer.src = '';
-            videoModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (e) => {
-            if(e.target === videoModal) {
-                mainVideoPlayer.pause();
-                mainVideoPlayer.src = '';
-                videoModal.style.display = 'none';
-            }
-        });
 
         fetchMovies();
     </script>
