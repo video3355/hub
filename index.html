@@ -388,7 +388,7 @@
             display: none;
         }
 
-        /* Ad Unlock Box Overlay (Compact & Clean) */
+        /* Ad Unlock Box Overlay */
         .ad-unlock-overlay {
             position: absolute;
             top: 0;
@@ -583,7 +583,7 @@
         </div>
     </div>
 
-    <!-- Main Container (Home View - UNTOUCHED) -->
+    <!-- Main Container (Home View) -->
     <div class="container" id="homeView">
         <!-- New Videos Section -->
         <section id="newVideosSection">
@@ -904,7 +904,7 @@
                         }
                     });
 
-2                    partsContainer.appendChild(btn);
+                    partsContainer.appendChild(btn);
                 });
             }
 
@@ -929,11 +929,11 @@
                     if (elapsed < 6000) {
                         // Returned too early!
                         if (countdownInterval) clearInterval(countdownInterval);
-                        warningText.textContent = "৬ সেকেন্ড পূর্ণ হয়নি! স্টেপটি পুনরায় করুন।";
+                        warningText.textContent = "স্টেপটি পুনরায় করুন।";
                         
                         adActionBtn.disabled = false;
                         adActionBtn.textContent = `Step ${currentAdStep}`;
-                        adInstruction.innerHTML = "অ্যাড পেজে ৬ সেকেন্ড অপেক্ষা করুন।";
+                        adInstruction.innerHTML = "অ্যাড পেজে ৬ সেকেন্ড অপেক্ষা করা হয়নি।";
                         adOpenedTime = 0;
                         isTabAway = false;
                     } else {
@@ -956,7 +956,7 @@
                 targetLink = "https://beansnicerroller.com/ajhx3gup3?key=160a59d5002f5af7245daaec034941cd";
             }
 
-            if (warningText.textContent.includes("পূর্ণ হয়নি")) {
+            if (warningText.textContent.includes("পুনরায়")) {
                 warningText.textContent = "";
             }
 
